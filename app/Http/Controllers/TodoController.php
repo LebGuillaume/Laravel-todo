@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Notifications\TodoAffected;
 use App\Todo;
 use App\User;
 use Illuminate\Http\Request;
@@ -29,6 +31,7 @@ class TodoController extends Controller
         $todo->affectedTo_id = $user->id;
         $todo->affectedBy_id = Auth::user()->id;
         $todo->update();
+        $user->notify(new TodoAffected($todo));
 
         return back();
 
@@ -93,6 +96,8 @@ class TodoController extends Controller
         $todo->name = $request->name;
         $todo->description = $request->description;
         $todo->save();
+        notify()->success("La todo <span class='badge badge-dark'>#$todo->id</span> vient d'être crée");
+
         return redirect()->route('todos.index');
     }
 
@@ -131,6 +136,7 @@ class TodoController extends Controller
             $request['done']=0;
         }
         $todo -> update($request->all());
+        notify()->info("La todo <span class='badge badge-dark'>#$todo->id</span> vient d'être mise à jour.");
         return redirect()->route('todos.index');
     }
 
@@ -143,6 +149,7 @@ class TodoController extends Controller
     public function destroy(Todo $todo)
     {
         $todo->delete();
+        notify()->error("La todo <span class='badge badge-dark'>#$todo->id</span> vient d'être supprimée.");
         return back();
     }
 
@@ -150,6 +157,7 @@ class TodoController extends Controller
     {
         $todo->done=1;
         $todo->update();
+        notify()->info("La todo <span class='badge badge-dark'>#$todo->id</span> est à faire.");
         return back();
     }
 
@@ -157,6 +165,7 @@ class TodoController extends Controller
     {
         $todo->done=0;
         $todo->update();
+        notify()->info("La todo <span class='badge badge-dark'>#$todo->id</span> est terminée.");
         return back();
     }
 }

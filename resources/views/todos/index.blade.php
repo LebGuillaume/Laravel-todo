@@ -43,6 +43,12 @@
                             @elseif($data->todoAffectedTo)
                             {{ $data->todoAffectedTo ? ',affectée à' . $data->todoAffectedTo->name:'' }}
                             @endif
+
+                            @if ($data->todoAffectedTo && $data->todoAffectedBy && $data->todoAffectedBy->id == Auth::user()->id)
+                            par moi même :d
+                            @elseif ($data->todoAffectedTo && $data->todoAffectedBy && $data->todoAffectedBy->id != Auth::user()->id)
+                            par {{ $data->todoAffectedBy->name }}
+                            @endif
                         </small>
                     </p>
 
@@ -52,7 +58,7 @@
 
 
                     </details>
-@if($data->done)
+                    @if($data->done)
                     <small>
                         <p>
                             Terminée
@@ -98,8 +104,14 @@
                     </form>
                     @endif
                     {{-- Button edit --}}
+                    @can('edit', $data)
                     <a name="" id="" class="btn btn-info mx-1" href="{{ route('todos.edit', $data->id) }}" role="button" >Editer</a>
+                    @elsecannot('edit', $data)
+                    <a name="" id="" class="btn btn-info mx-1 disabled" href="{{ route('todos.edit', $data->id) }}" role="button" >Editer</a>
+                    @endcan
+
                     {{-- Button delete  --}}
+                    @can('delete', $data)
                      <form action="{{ route('todos.destroy', $data->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
@@ -107,6 +119,15 @@
                         <button type="submit" class="btn btn-danger mx-1" >Effacer</button>
 
                     </form>
+                     @elsecannot('delete', $data)
+                     <form action="{{ route('todos.destroy', $data->id) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit" class="btn btn-danger mx-1 disabled" >Effacer</button>
+
+                    </form>
+                    @endcan
                 </div>
             </div>
 
